@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-speedometer2"></i> Admin Dashboard</h2>
+        <div>
+            <a href="{{ url_for('change_password') }}" class="btn btn-outline-primary btn-sm me-2">
+                <i class="bi bi-key"></i> Tukar Password
+            </a>
+            <span class="text-muted">
+                <i class="bi bi-calendar"></i> {{ today.strftime('%d %B %Y') }}
+                <span class="ms-3" id="currentTime"></span>
+            </span>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Jumlah Pelajar</h6>
+                            <h2 class="mb-0">{{ total_students }}</h2>
+                        </div>
+                        <i class="bi bi-people display-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Hadir Hari Ini</h6>
+                            <h2 class="mb-0">{{ today_attendance }}</h2>
+                        </div>
+                        <i class="bi bi-check-circle display-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card bg-warning text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Lewat Hari Ini</h6>
+                            <h2 class="mb-0">{{ late_today }}</h2>
+                        </div>
+                        <i class="bi bi-exclamation-triangle display-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card bg-info text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Bulan Ini</h6>
+                            <h2 class="mb-0">{{ total_attendance_month }}</h2>
+                        </div>
+                        <i class="bi bi-calendar-check display-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Kehadiran Hari Ini -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-clock-history"></i> Kehadiran Hari Ini</h5>
+            <a href="{{ url_for('admin_attendance') }}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-calendar-check"></i> Lihat Semua
+            </a>
+        </div>
+        <div class="card-body">
+            {% if today_attendance > 0 %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nama</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attendance, user in recent_attendances %}
+                        <tr>
+                            <td><i class="bi bi-person-circle"></i> {{ user.full_name }}</td>
+                            <td>{{ attendance.check_in.strftime('%I:%M %p') }}</td>
+                            <td>
+                                {% if attendance.check_out %}
+                                    {{ attendance.check_out.strftime('%I:%M %p') }}
+                                {% else %}
+                                    <span class="badge bg-warning">Belum</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if attendance.status == 'present' %}
+                                    <span class="badge bg-success">Hadir</span>
+                                {% elif attendance.status == 'late' %}
+                                    <span class="badge bg-warning">Lewat</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Tidak Hadir</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-calendar-x display-4 text-muted"></i>
+                <p class="mt-2 text-muted">Tiada kehadiran hari ini.</p>
+                <a href="{{ url_for('admin_attendance') }}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-calendar-check"></i> Lihat Semua Kehadiran
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('ms-MY', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        });
+        document.getElementById('currentTime').textContent = timeString;
+    }
+    
+    updateTime();
+    setInterval(updateTime, 1000);
+</script>
+{% endblock %}

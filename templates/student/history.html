@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance History{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4"><i class="bi bi-clock-history"></i> Sejarah Kehadiran</h2>
+    
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-12 col-md-4">
+                    <label for="month" class="form-label">Bulan</label>
+                    <select class="form-select" id="month" name="month" onchange="this.form.submit()">
+                        {% for m in range(1, 13) %}
+                        <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>
+                            {{ ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 
+                                'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'][m-1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-12 col-md-4">
+                    <label for="year" class="form-label">Tahun</label>
+                    <select class="form-select" id="year" name="year" onchange="this.form.submit()">
+                        {% for y in range(2023, 2031) %}
+                        <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>
+                            {{ y }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tarikh</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Status</th>
+                            <th>Tempoh</th>
+                            <th>Lokasi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attendance in attendances %}
+                        <tr>
+                            <td>{{ attendance.check_in.strftime('%d %B %Y') }}</td>
+                            <td>{{ attendance.check_in.strftime('%H:%M:%S') }}</td>
+                            <td>
+                                {% if attendance.check_out %}
+                                    {{ attendance.check_out.strftime('%H:%M:%S') }}
+                                {% else %}
+                                    <span class="badge bg-warning">Belum</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if attendance.status == 'present' %}
+                                    <span class="badge bg-success">Hadir</span>
+                                {% elif attendance.status == 'late' %}
+                                    <span class="badge bg-warning">Lewat</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Tidak Hadir</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ attendance.duration }}</td>
+                            <td>{{ attendance.location or 'N/A' }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4">
+                                <i class="bi bi-calendar-x display-4 text-muted"></i>
+                                <p class="mt-2">Tiada rekod untuk bulan ini.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

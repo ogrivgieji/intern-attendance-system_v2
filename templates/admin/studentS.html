@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Student Management - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-people"></i> Pengurusan Pelajar</h2>
+        <a href="{{ url_for('add_student') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Tambah Pelajar
+        </a>
+    </div>
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Nama</th>
+                            <th>Email</th>
+                            <th>Tarikh Daftar</th>
+                            <th>Tindakan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                <i class="bi bi-person-circle"></i> {{ student.full_name }}
+                            </td>
+                            <td>{{ student.email }}</td>
+                            <td>{{ student.created_at.strftime('%d-%m-%Y') }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_student', student_id=student.id) }}" 
+                                   class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <button type="button" class="btn btn-sm btn-info" 
+                                        onclick="resetPassword('{{ student.id }}', '{{ student.full_name }}')">
+                                    <i class="bi bi-key"></i> Reset PW
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" 
+                                        onclick="deleteStudent('{{ student.id }}', '{{ student.full_name }}')">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4">
+                                <p>Tiada pelajar berdaftar.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Sahkan Padam</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Adakah anda pasti mahu memadam pelajar <strong id="deleteStudentName"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="POST">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger">Padam</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="resetPasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">Reset Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Anda akan reset password untuk <strong id="resetStudentName"></strong>.</p>
+                <p>Password baru: <code>student123</code></p>
+            </div>
+            <div class="modal-footer">
+                <form id="resetForm" method="POST">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-info">Reset</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function deleteStudent(studentId, studentName) {
+        document.getElementById('deleteStudentName').textContent = studentName;
+        document.getElementById('deleteForm').action = '/admin/student/delete/' + studentId;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+    
+    function resetPassword(studentId, studentName) {
+        document.getElementById('resetStudentName').textContent = studentName;
+        document.getElementById('resetForm').action = '/admin/reset-password/' + studentId;
+        new bootstrap.Modal(document.getElementById('resetPasswordModal')).show();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-house"></i> Student Dashboard</h2>
+        <div class="text-muted" id="currentDateTime"></div>
+    </div>
+    
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-check display-4"></i>
+                    <h5 class="mt-2">Jumlah Kehadiran</h5>
+                    <h2>{{ total_attendance }}</h2>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card bg-warning text-white shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle display-4"></i>
+                    <h5 class="mt-2">Jumlah Lewat</h5>
+                    <h2>{{ late_count }}</h2>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card bg-{{ 'success' if attendance_today else 'secondary' }} text-white shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-{{ 'check-circle' if attendance_today else 'x-circle' }} display-4"></i>
+                    <h5 class="mt-2">Status Hari Ini</h5>
+                    <h2>{{ 'Hadir' if attendance_today else 'Belum' }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    {% if not attendance_today %}
+                        <h5 class="text-success">Sila Check In</h5>
+                        <form method="POST" action="{{ url_for('check_in') }}" id="checkInForm">
+                            <input type="hidden" name="location" id="locationInput" value="Not provided">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-box-arrow-in-right"></i> Check In
+                            </button>
+                        </form>
+                        <small class="text-muted mt-2">Lokasi: <span id="locationStatus">Mengesan...</span></small>
+                    {% elif attendance_today and not attendance_today.check_out %}
+                        <h5 class="text-primary">Anda telah Check In pada {{ attendance_today.check_in.strftime('%I:%M %p') }}</h5>
+                        <span class="badge bg-{{ 'success' if attendance_today.status == 'present' else 'warning' }}">
+                            {{ 'Hadir' if attendance_today.status == 'present' else 'Lewat' }}
+                        </span>
+                        <hr>
+                        <form method="POST" action="{{ url_for('check_out') }}">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-box-arrow-right"></i> Check Out
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle"></i> Anda telah selesai untuk hari ini!
+                            <br>
+                            Check In: {{ attendance_today.check_in.strftime('%I:%M %p') }}
+                            <br>
+                            Check Out: {{ attendance_today.check_out.strftime('%I:%M %p') }}
+                            <br>
+                            Tempoh: {{ attendance_today.duration }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5><i class="bi bi-clock-history"></i> Sejarah Terkini</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tarikh</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Status</th>
+                            <th>Tempoh</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attendance in recent_attendances %}
+                        <tr>
+                            <td>{{ attendance.check_in.strftime('%d-%m-%Y') }}</td>
+                            <td>{{ attendance.check_in.strftime('%H:%M:%S') }}</td>
+                            <td>
+                                {% if attendance.check_out %}
+                                    {{ attendance.check_out.strftime('%H:%M:%S') }}
+                                {% else %}
+                                    <span class="badge bg-warning">Belum</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if attendance.status == 'present' %}
+                                    <span class="badge bg-success">Hadir</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Lewat</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ attendance.duration }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center">Tiada rekod.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('currentDateTime').textContent = 
+            now.toLocaleDateString('ms-MY') + ' ' + 
+            now.toLocaleTimeString('ms-MY');
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+    
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                document.getElementById('locationInput').value = `${lat},${lon}`;
+                document.getElementById('locationStatus').textContent = 'Telah dikesan';
+            },
+            error => {
+                document.getElementById('locationStatus').textContent = 'Tidak dapat dikesan';
+            }
+        );
+    }
+</script>
+{% endblock %}

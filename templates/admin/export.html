@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Export Data - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4"><i class="bi bi-download"></i> Export Data Kehadiran</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-file-excel"></i> Export ke Excel</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('export_excel') }}">
+                        <div class="mb-3">
+                            <label for="date_from" class="form-label">Dari Tarikh</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="date_to" class="form-label">Hingga Tarikh</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-download"></i> Download Excel
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Maklumat</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li>Export data dalam format Excel (.xlsx)</li>
+                        <li>Anda boleh memilih julat tarikh untuk export</li>
+                        <li>Kosongkan tarikh untuk export semua data</li>
+                        <li>File Excel mengandungi:
+                            <ul>
+                                <li>Nama pelajar</li>
+                                <li>Email</li>
+                                <li>Check In / Check Out</li>
+                                <li>Status kehadiran</li>
+                                <li>Lokasi</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
