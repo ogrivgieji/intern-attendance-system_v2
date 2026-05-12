@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Kehadiran{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="bi bi-pencil"></i> Edit Rekod Kehadiran</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Check In</label>
+                            <input type="datetime-local" class="form-control" name="check_in" 
+                                   value="{{ attendance.check_in.strftime('%Y-%m-%dT%H:%M') }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Check Out</label>
+                            <input type="datetime-local" class="form-control" name="check_out" 
+                                   value="{{ attendance.check_out.strftime('%Y-%m-%dT%H:%M') if attendance.check_out else '' }}">
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin_attendance') }}" class="btn btn-secondary">Kembali</a>
+                            <button type="submit" class="btn btn-warning">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
