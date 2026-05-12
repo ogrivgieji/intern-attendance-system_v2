@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Import Custom Attendance{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-upload"></i> Import Custom Attendance</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="user_id" class="form-label">Pilih Pelajar</label>
+                            <select class="form-select" id="user_id" name="user_id" required>
+                                <option value="">-- Pilih Pelajar --</option>
+                                {% for student in students %}
+                                <option value="{{ student.id }}">{{ student.full_name }} ({{ student.email }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="dates" class="form-label">
+                                Senarai Tarikh <small class="text-muted">(satu tarikh per line)</small>
+                            </label>
+                            <textarea class="form-control" id="dates" name="dates" rows="12" 
+                                      placeholder="2026-03-16&#10;2026-03-17&#10;2026-03-18&#10;2026-03-19&#10;..."></textarea>
+                            <small class="text-muted">
+                                Format: YYYY-MM-DD | Satu tarikh per line | Masa: Random 07:55-08:00 & 17:00-17:05
+                            </small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin_attendance') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Kembali
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-upload"></i> Import
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <hr>
+                    
+                    <div class="mt-3">
+                        <h6>Contoh Tarikh:</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-sm btn-outline-secondary w-100 mb-2" 
+                                        onclick="fillDates('mac')">Mac 2026</button>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-sm btn-outline-secondary w-100 mb-2" 
+                                        onclick="fillDates('april')">April 2026</button>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-sm btn-outline-secondary w-100 mb-2" 
+                                        onclick="fillDates('mei')">Mei 2026</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function fillDates(month) {
+        const textarea = document.getElementById('dates');
+        
+        const dates = {
+            'mac': `2026-03-16
+2026-03-17
+2026-03-18
+2026-03-19
+2026-03-23
+2026-03-24
+2026-03-25
+2026-03-26
+2026-03-27
+2026-03-30
+2026-03-31`,
+            'april': `2026-04-01
+2026-04-02
+2026-04-06
+2026-04-07
+2026-04-08
+2026-04-09
+2026-04-10
+2026-04-13
+2026-04-14
+2026-04-15
+2026-04-16
+2026-04-17
+2026-04-20
+2026-04-21
+2026-04-22
+2026-04-23
+2026-04-24
+2026-04-27
+2026-04-28
+2026-04-29
+2026-04-30`,
+            'mei': `2026-05-04
+2026-05-05
+2026-05-06
+2026-05-07
+2026-05-08
+2026-05-11`
+        };
+        
+        textarea.value = dates[month];
+    }
+</script>
+{% endblock %}
