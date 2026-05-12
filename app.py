@@ -708,8 +708,115 @@ def change_password():
         
         flash('Password berjaya ditukar! Sila login semula.', 'success')
         return redirect(url_for('login'))
-    
+
     return render_template('admin/change_password.html')
+@app.route('/admin/import-backdate')
+@login_required
+@admin_required
+def import_backdate_page():
+    """Halaman pilih pelajar untuk import backdate"""
+    students = User.query.filter_by(role='student').order_by(User.full_name).all()
+    
+    html = '''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Import Backdate</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light">
+        <div class="container mt-5">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3>Import Backdate Attendance</h3>
+                </div>
+                <div class="card-body">
+                    <p>Pilih pelajar untuk import data backdate (16 Mac - 11 Mei 2026).</p>
+                    <div class="list-group">
+    '''
+    
+    for s in students:
+        html += f'''
+            <a href="/admin/import-backdate/{s.id}" class="list-group-item list-group-item-action">
+                <strong>{s.full_name}</strong> - {s.email}
+            </a>
+        '''
+    
+    html += '''
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    '''
+    
+    return html
+
+@app.route('/admin/import-backdate/<int:user_id>')
+@login_required
+@admin_required
+def import_backdate_run(user_id):
+    """Run import backdate untuk satu pelajar"""
+    import random
+    
+    def random_time_in():
+        hour = random.choice([7, 7, 7, 7, 7, 8])
+        minute = random.choice([55, 56, 57, 58, 59]) if hour == 7 else 0
+        return f"{hour:02d}:{minute:02d}"
+    
+    def random_time_out():
+        return f"17:{random.choice([0, 1, 2, 3, 4, 5]):02d}"
+    
+    attendance_dates = [
+        '2026-03-16','2026-03-17','2026-03-18','2026-03-19',
+        '2026-03-23','2026-03-24','2026-03-25','2026-03-26','2026-03-27',
+        '2026-03-30','2026-03-31',
+        '2026-04-01','2026-04-02',
+        '2026-04-06','2026-04-07','2026-04-08','2026-04-09','2026-04-10',
+        '2026-04-13','2026-04-14','2026-04-15','2026-04-16','2026-04-17',
+        '2026-04-20','2026-04-21','2026-04-22','2026-04-23','2026-04-24',
+        '2026-04-27','2026-04-28','2026-04-29','2026-04-30',
+        '2026-05-04','2026-05-05','2026-05-06','2026-05-07','2026-05-08',
+        '2026-05-11',
+    ]
+    
+    total = 0
+    skip = 0
+    
+    for date_str in attendance_dates:
+        time_in = random_time_in()
+        time_out = random_time_out()
+        
+        check_in = datetime.strptime(f"{date_str} {time_in}", '%Y-%m-%d %H:%M')
+        check_out = datetime.strptime(f"{date_str} {time_out}", '%Y-%m-%d %H:%M')
+        
+        status = 'present'
+        if check_in.hour >= 8 and check_in.minute > 0:
+            status = 'late'
+        
+        existing = Attendance.query.filter(
+            Attendance.user_id == user_id,
+            db.func.date(Attendance.check_in) == date_str
+        ).first()
+        
+        if existing:
+            skip += 1
+            continue
+        
+        attendance = Attendance(
+            user_id=user_id,
+            check_in=check_in,
+            check_out=check_out,
+            status=status,
+            location='Office'
+        )
+        db.session.add(attendance)
+        total += 1
+    
+    db.session.commit()
+    flash(f'{total} rekod berjaya diimport! ({skip} dilangkau)', 'success')
+    return redirect(url_for('admin_attendance'))
 # =============== ERROR HANDLERS ===============
 @app.errorhandler(404)
 def not_found_error(error):
