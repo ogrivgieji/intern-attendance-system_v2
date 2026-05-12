@@ -818,7 +818,7 @@ def import_backdate_run(user_id):
     db.session.commit()
     flash(f'{total} rekod berjaya diimport! ({skip} dilangkau)', 'success')
     return redirect(url_for('admin_attendance'))
-    @app.route('/admin/import-custom', methods=['GET', 'POST'])
+@app.route('/admin/import-custom', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def import_custom():
