@@ -895,6 +895,37 @@ def import_custom():
     
     students = User.query.filter_by(role='student').order_by(User.full_name).all()
     return render_template('admin/import_custom.html', students=students)
+    
+@app.route('/admin/edit-attendance/<int:attendance_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_attendance(attendance_id):
+    """Admin edit attendance record"""
+    attendance = Attendance.query.get_or_404(attendance_id)
+    
+    if request.method == 'POST':
+        check_in_str = request.form.get('check_in', '')
+        check_out_str = request.form.get('check_out', '')
+        
+        if check_in_str:
+            try:
+                attendance.check_in = datetime.strptime(check_in_str, '%Y-%m-%dT%H:%M')
+            except:
+                flash('Format masa tidak sah!', 'danger')
+                return redirect(url_for('admin_attendance'))
+        
+        if check_out_str:
+            try:
+                attendance.check_out = datetime.strptime(check_out_str, '%Y-%m-%dT%H:%M')
+            except:
+                flash('Format masa tidak sah!', 'danger')
+                return redirect(url_for('admin_attendance'))
+        
+        db.session.commit()
+        flash('Rekod berjaya dikemaskini!', 'success')
+        return redirect(url_for('admin_attendance'))
+    
+    return render_template('admin/edit_attendance.html', attendance=attendance)
 # =============== ERROR HANDLERS ===============
 @app.errorhandler(404)
 def not_found_error(error):
