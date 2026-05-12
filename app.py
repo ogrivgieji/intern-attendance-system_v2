@@ -710,6 +710,7 @@ def change_password():
         return redirect(url_for('login'))
 
     return render_template('admin/change_password.html')
+    
 @app.route('/admin/import-backdate')
 @login_required
 @admin_required
@@ -817,6 +818,83 @@ def import_backdate_run(user_id):
     db.session.commit()
     flash(f'{total} rekod berjaya diimport! ({skip} dilangkau)', 'success')
     return redirect(url_for('admin_attendance'))
+    @app.route('/admin/import-custom', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def import_custom():
+    """Form import custom - pilih pelajar & taip tarikh"""
+    import random
+    
+    if request.method == 'POST':
+        user_id = request.form.get('user_id', type=int)
+        dates_text = request.form.get('dates', '')
+        
+        if not user_id or not dates_text:
+            flash('Sila pilih pelajar dan isi tarikh!', 'danger')
+            return redirect(url_for('import_custom'))
+        
+        user = User.query.get(user_id)
+        if not user:
+            flash('Pelajar tidak dijumpai!', 'danger')
+            return redirect(url_for('import_custom'))
+        
+        # Parse tarikh dari textarea (satu tarikh per line)
+        attendance_dates = []
+        for line in dates_text.strip().split('\n'):
+            line = line.strip()
+            if line:
+                attendance_dates.append(line)
+        
+        def random_time_in():
+            hour = random.choice([7, 7, 7, 7, 7, 8])
+            minute = random.choice([55, 56, 57, 58, 59]) if hour == 7 else 0
+            return f"{hour:02d}:{minute:02d}"
+        
+        def random_time_out():
+            return f"17:{random.choice([0, 1, 2, 3, 4, 5]):02d}"
+        
+        total = 0
+        skip = 0
+        
+        for date_str in attendance_dates:
+            try:
+                time_in = random_time_in()
+                time_out = random_time_out()
+                
+                check_in = datetime.strptime(f"{date_str} {time_in}", '%Y-%m-%d %H:%M')
+                check_out = datetime.strptime(f"{date_str} {time_out}", '%Y-%m-%d %H:%M')
+                
+                status = 'present'
+                if check_in.hour >= 8 and check_in.minute > 0:
+                    status = 'late'
+                
+                existing = Attendance.query.filter(
+                    Attendance.user_id == user_id,
+                    db.func.date(Attendance.check_in) == date_str
+                ).first()
+                
+                if existing:
+                    skip += 1
+                    continue
+                
+                attendance = Attendance(
+                    user_id=user_id,
+                    check_in=check_in,
+                    check_out=check_out,
+                    status=status,
+                    location='Office'
+                )
+                db.session.add(attendance)
+                total += 1
+            except:
+                continue
+        
+        db.session.commit()
+        flash(f'{total} rekod diimport untuk {user.full_name}! ({skip} dilangkau)', 'success')
+        return redirect(url_for('admin_attendance'))
+    
+    students = User.query.filter_by(role='student').order_by(User.full_name).all()
+    return render_template('admin/import_custom.html', students=students)
 # =============== ERROR HANDLERS ===============
 @app.errorhandler(404)
 def not_found_error(error):
