@@ -125,13 +125,13 @@
                                             {% endif %}
                                         </td>
                                         <td>{{ attendance.location or 'N/A' }}</td>
-                                        <!--
+                                    
                                         <td>
                                             <a href="{{ url_for('edit_attendance', attendance_id=attendance.id) }}" 
                                                class="btn btn-sm btn-warning">
                                                 <i class="bi bi-pencil"></i> Edit
                                             </a>
-                                        -->
+                                        
                                             <form method="POST" action="{{ url_for('delete_attendance', attendance_id=attendance.id) }}" 
                                                   style="display:inline;" onsubmit="return confirm('Padam rekod ini?')">
                                                 <button type="submit" class="btn btn-sm btn-danger">
