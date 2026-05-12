@@ -926,6 +926,21 @@ def edit_attendance(attendance_id):
         return redirect(url_for('admin_attendance'))
     
     return render_template('admin/edit_attendance.html', attendance=attendance)
+@app.route('/admin/delete-attendance/<int:attendance_id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_attendance(attendance_id):
+    """Admin delete attendance record"""
+    attendance = Attendance.query.get_or_404(attendance_id)
+    
+    attendance_id_copy = attendance.id
+    user_name = User.query.get(attendance.user_id).full_name if attendance.user_id else 'Unknown'
+    
+    db.session.delete(attendance)
+    db.session.commit()
+    
+    flash(f'Rekod #{attendance_id_copy} ({user_name}) berjaya dipadam!', 'success')
+    return redirect(url_for('admin_attendance'))
 # =============== ERROR HANDLERS ===============
 @app.errorhandler(404)
 def not_found_error(error):
