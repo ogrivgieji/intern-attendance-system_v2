@@ -11,10 +11,10 @@ from config import Config
 from models import db, User, Attendance
 
 def get_malaysia_time():
-    """Dapatkan waktu Malaysia (UTC+8) - Guna timezone dari environment"""
-    tz_name = os.environ.get('TZ', 'Asia/Kuala_Lumpur')
-    malaysia_tz = pytz.timezone(tz_name)
-    return datetime.now(malaysia_tz)
+    """Dapatkan waktu Malaysia (UTC+8) - HARDCODE OFFSET"""
+    from datetime import datetime, timedelta
+    # Render server guna UTC, jadi tambah 8 jam untuk Malaysia
+    return datetime.utcnow() + timedelta(hours=8)
 
 def create_app():
     """Factory function untuk create Flask app"""
