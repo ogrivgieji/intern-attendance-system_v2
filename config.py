@@ -1,9 +1,13 @@
 import os
+import pytz
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'attendance-secret-key-2024'
     
     basedir = os.path.abspath(os.path.dirname(__file__))
+    
+    # Timezone
+    TIMEZONE = pytz.timezone('Asia/Kuala_Lumpur')
     
     # Guna DATABASE_URL dari Render jika ada (PostgreSQL)
     database_url = os.environ.get('DATABASE_URL', '')
