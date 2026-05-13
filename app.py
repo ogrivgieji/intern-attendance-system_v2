@@ -11,8 +11,9 @@ from config import Config
 from models import db, User, Attendance
 
 def get_malaysia_time():
-    """Dapatkan waktu Malaysia (UTC+8)"""
-    malaysia_tz = pytz.timezone('Asia/Kuala_Lumpur')
+    """Dapatkan waktu Malaysia (UTC+8) - Guna timezone dari environment"""
+    tz_name = os.environ.get('TZ', 'Asia/Kuala_Lumpur')
+    malaysia_tz = pytz.timezone(tz_name)
     return datetime.now(malaysia_tz)
 
 def create_app():
