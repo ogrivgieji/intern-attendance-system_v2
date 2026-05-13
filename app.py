@@ -143,7 +143,7 @@ def student_dashboard():
         return redirect(url_for('admin_dashboard'))
     
     # Check if already checked in today
-    today = date.today()
+    today = get_malaysia_time().date()
     attendance_today = Attendance.query.filter(
         Attendance.user_id == current_user.id,
         db.func.date(Attendance.check_in) == today
@@ -170,7 +170,7 @@ def check_in():
     if current_user.role != 'student':
         return redirect(url_for('admin_dashboard'))
     
-    today = date.today()
+    today = get_malaysia_time().date()
     
     # Check jika sudah check in hari ini
     existing = Attendance.query.filter(
@@ -214,7 +214,7 @@ def check_out():
     if current_user.role != 'student':
         return redirect(url_for('admin_dashboard'))
     
-    today = date.today()
+    today = get_malaysia_time().date()
     
     # Cari attendance yang belum check out
     attendance = Attendance.query.filter(
@@ -274,7 +274,7 @@ def student_profile():
 @admin_required
 def admin_dashboard():
     """Admin dashboard dengan statistik"""
-    today = date.today()
+    today = get_malaysia_time().date()
     
     # Get statistics
     total_students = User.query.filter_by(role='student').count()
