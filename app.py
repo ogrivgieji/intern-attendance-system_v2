@@ -185,15 +185,12 @@ def check_in():
     # Guna waktu Malaysia
     now = get_malaysia_time()
     
-    # Determine status (late after 9:00 AM)
     status = 'present'
     if now.hour >= 9:
         status = 'late'
     
-    # Get location (optional)
     location = request.form.get('location', 'Not provided')
     
-    # Create attendance record
     attendance = Attendance(
         user_id=current_user.id,
         check_in=now,
